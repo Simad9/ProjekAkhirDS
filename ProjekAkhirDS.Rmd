@@ -10,24 +10,33 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Projek Akhir Prak DS
+
 Yedhit Trisakti Tamma (123220160) (DS-D) (Prak DS-A)\
 Zalva Aqvi Ramadhani (123220032) (DS-C) (Prak DS-E)\
 Wijdan Akhmad Subarkat (123220010) (DS-E) (Prak DS-G)\
 
 # Penjelasan
+
 Pada Projek Akhir ini kami mengambil judul **Analisis Keadaan Sekolah Dasar Berdasarkan Status Negeri dan Swasta di Indonesia (2021-2023)**\
 Disini kami menggunakan metode IBM Data Science Methodology. Sehingga kita akan membahas sesuai dengan tahapan Metodology tersebut.
 
 ## Business Understanding
+Memahami tujuan dan kebutuhan bisnis untuk memandu proses analitik.
+
 Teks
 
 ## Analytic Approach
+Menentukan metode analisis yang sesuai untuk menyelesaikan masalah bisnis.
+
 Teks
 
 ## Data Requirements
+Mengidentifikasi data yang diperlukan untuk analisis.
+
 Teks
 
 ## Data Collection
+Mengumpulkan data yang relevan dari sumber yang tersedia.
 ```{r}
 # Import Library
 library(dslabs)
@@ -36,7 +45,9 @@ library(tidymodels)
 library(caret)
 library(dplyr)
 library(ggplot2)
+```
 
+```{r}
 # Membaca file dataset
 library(openxlsx)  # atau library(xlsx)
 data2021 = read.xlsx("Dataset/keadaanSekolahDasarProv_2021.xlsx")
@@ -56,6 +67,8 @@ head(sekolah_data)
 ```
 
 ## Data Understanding
+Mengeksplorasi dan memahami karakteristik data.
+
 Tampilan jumlah sekolah per provinsi menggunakan bar chart.
 ```{r}
 # Menghitung jumlah sekolah per provinsi
@@ -76,12 +89,15 @@ ggplot(sekolah_per_provinsi, aes(x = reorder(Provinsi, Sekolah), y = Sekolah)) +
 ```
 
 ## Data Preparation
+Membersihkan dan mempersiapkan data agar siap digunakan dalam analisis.
+
 ```{r}
 
 
 ```
 
 ## Modeling
+Membuat dan menguji model untuk menjawab masalah yang telah dirumuskan.
 ```{r}
 # Spliting data
 
@@ -91,6 +107,7 @@ ggplot(sekolah_per_provinsi, aes(x = reorder(Provinsi, Sekolah), y = Sekolah)) +
 ```
 
 ## Evaluasi
+Menilai kinerja model dan memastikan hasilnya relevan dengan tujuan bisnis.
 ```{r}
 # Testing Model
 
