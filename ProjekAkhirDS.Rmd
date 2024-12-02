@@ -19,15 +19,12 @@ Pada Projek Akhir ini kami mengambil judul **Analisis Keadaan Sekolah Dasar Berd
 Disini kami menggunakan metode IBM Data Science Methodology. Sehingga kita akan membahas sesuai dengan tahapan Metodology tersebut.
 
 ## Business Understanding
-
 Teks
 
 ## Analytic Approach
-
 Teks
 
 ## Data Requirements
-
 Teks
 
 ## Data Collection
@@ -38,45 +35,64 @@ library(tidyverse)
 library(tidymodels)
 library(caret)
 library(dplyr)
+library(ggplot2)
 
 # Membaca file dataset
 library(openxlsx)  # atau library(xlsx)
-data1 = read.xlsx("Dataset/keadaanSekolahDasarProv_2021.xlsx")
-data2 = read.xlsx("Dataset/keadaanSekolahDasarProv_2022.xlsx")
-data3 = read.xlsx("Dataset/keadaanSekolahDasarProv_2023.xlsx")
+data2021 = read.xlsx("Dataset/keadaanSekolahDasarProv_2021.xlsx")
+data2022 = read.xlsx("Dataset/keadaanSekolahDasarProv_2022.xlsx")
+data2023 = read.xlsx("Dataset/keadaanSekolahDasarProv_2023.xlsx")
 
-data1 = data1 %>% mutate(Tahun = "2021")
-data2 = data2 %>% mutate(Tahun = "2022")
-data3 = data3 %>% mutate(Tahun = "2023")
+data2021 = data2021 %>% mutate(Tahun = "2021")
+data2022 = data2022 %>% mutate(Tahun = "2022")
+data2023 = data2023 %>% mutate(Tahun = "2023")
 
 # Gabungkan ke-3 dataset
-sekolah_data <- bind_rows(data1, data2, data3)
-sekolah_data <- sekolah_data %>% arrange(Provinsi, Tahun)
+sekolah_data = bind_rows(data2021, data2022, data2023)
+sekolah_data = sekolah_data %>% arrange(Provinsi, Tahun)
 
-# Cek Data
+# menampilkan data gabungan
+head(sekolah_data)
 ```
 
 ## Data Understanding
-
+Tampilan jumlah sekolah per provinsi menggunakan bar chart.
 ```{r}
+# Menghitung jumlah sekolah per provinsi
+sekolah_per_provinsi <- sekolah_data %>%
+  group_by(Provinsi) %>%
+  summarise(Sekolah = sum(Sekolah))
+
+# Membuat visualisasi
+ggplot(sekolah_per_provinsi, aes(x = reorder(Provinsi, Sekolah), y = Sekolah)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  coord_flip() +
+  labs(title = "Jumlah Sekolah di Setiap Provinsi", x = "Provinsi", y = "Jumlah Sekolah") +
+  theme_minimal()
+
+# EDA
 
 
 ```
 
 ## Data Preparation
-
 ```{r}
+
 
 ```
 
 ## Modeling
-
 ```{r}
+# Spliting data
 
+# Model Statistik - Uji T atau Mann-Whitney U Test
+
+# Model Machine Learning - Logistic Regression
 ```
 
 ## Evaluasi
-
 ```{r}
+# Testing Model
 
+# Shinny
 ```
