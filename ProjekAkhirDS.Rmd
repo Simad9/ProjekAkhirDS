@@ -10,31 +10,38 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Projek Akhir Prak DS
+
 Yedhit Trisakti Tamma (123220160) (DS-D) (Prak DS-A)\
 Zalva Aqvi Ramadhani (123220032) (DS-C) (Prak DS-E)\
 Wijdan Akhmad Subarkat (123220010) (DS-E) (Prak DS-G)\
 
 # Penjelasan
+
 Pada Projek Akhir ini kami mengambil judul **Analisis Keadaan Sekolah Dasar Berdasarkan Status Negeri dan Swasta di Indonesia (2021-2023)**\
 Disini kami menggunakan metode IBM Data Science Methodology. Sehingga kita akan membahas sesuai dengan tahapan Metodology tersebut.
 
 ## Business Understanding
-Memahami tujuan dan kebutuhan bisnis untuk memandu proses analitik.
+
+Memahami tujuan dan kebutuhan bisnis untuk memandu proses analitik.\
 
 Teks
 
 ## Analytic Approach
-Menentukan metode analisis yang sesuai untuk menyelesaikan masalah bisnis.
+
+Menentukan metode analisis yang sesuai untuk menyelesaikan masalah bisnis.\
 
 Teks
 
 ## Data Requirements
-Mengidentifikasi data yang diperlukan untuk analisis.
+
+Mengidentifikasi data yang diperlukan untuk analisis.\
 
 Teks
 
 ## Data Collection
+
 Mengumpulkan data yang relevan dari sumber yang tersedia.
+
 ```{r}
 # Import Library
 library(dslabs)
@@ -65,9 +72,23 @@ head(sekolah_data)
 ```
 
 ## Data Understanding
+
 Mengeksplorasi dan memahami karakteristik data.
 
+Melihat struktur data untuk memahami tipe data dan ukuran dataset.
+
+```{r}
+# Melihat struktur data
+str(sekolah_data)
+
+cat("\n")
+
+# Ringkasan data
+summary(sekolah_data)
+```
+
 Tampilan jumlah sekolah per provinsi menggunakan bar chart.
+
 ```{r}
 # Menghitung jumlah sekolah per provinsi
 sekolah_per_provinsi <- sekolah_data %>%
@@ -80,29 +101,102 @@ ggplot(sekolah_per_provinsi, aes(x = reorder(Provinsi, Sekolah), y = Sekolah)) +
   coord_flip() +
   labs(title = "Jumlah Sekolah di Setiap Provinsi", x = "Provinsi", y = "Jumlah Sekolah") +
   theme_minimal()
+```
 
-# EDA
+Menganalisis distribusi jumlah guru di setiap provinsi.
 
+```{r}
+# Distribusi jumlah guru
+library(ggplot2)
+
+ggplot(sekolah_data, aes(x = `Kepala.Sekolah.&.Guru`)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "black") +
+  labs(title = "Distribusi Jumlah Guru di Sekolah Dasar", x = "Jumlah Guru", y = "Frekuensi")
+```
+
+Menghitung rasio guru terhadap siswa di setiap provinsi.
+
+```{r}
+# Menambahkan kolom rasio guru-siswa
+sekolah_data <- sekolah_data %>%
+  mutate(Rasio.Guru.Siswa = `Kepala.Sekolah.&.Guru` / Siswa)
+
+# Ringkasan rasio guru-siswa
+summary(sekolah_data$Rasio.Guru.Siswa)
+
+# Visualisasi rasio guru-siswa
+ggplot(sekolah_data, aes(x = Rasio.Guru.Siswa)) +
+  geom_histogram(bins = 20, fill = "tomato", color = "black") +
+  labs(title = "Distribusi Rasio Guru-Siswa", x = "Rasio Guru-Siswa", y = "Frekuensi")
+```
+
+Melihat distribusi siswa yang mengulang dan putus sekolah berdasarkan status sekolah.
+
+```{r}
+# Visualisasi siswa mengulang
+ggplot(sekolah_data, aes(x = Status, y = Mengulang, fill = Status)) +
+  geom_boxplot() +
+  labs(title = "Distribusi Siswa Mengulang Berdasarkan Status Sekolah", x = "Status Sekolah", y = "Jumlah Siswa Mengulang") +
+  theme_minimal()
+
+# Visualisasi siswa putus sekolah
+ggplot(sekolah_data, aes(x = Status, y = `Putus.Sekolah`, fill = Status)) +
+  geom_boxplot() +
+  labs(title = "Distribusi Siswa Putus Sekolah Berdasarkan Status Sekolah", x = "Status Sekolah", y = "Jumlah Siswa Putus Sekolah") +
+  theme_minimal()
+```
+
+Membandingkan rata-rata rasio guru-siswa di seluruh provinsi.
+
+```{r}
+# Rata-rata rasio guru-siswa per provinsi
+avg_rasio <- sekolah_data %>%
+  group_by(Provinsi) %>%
+  summarise(Rata_Rasio = mean(Rasio.Guru.Siswa, na.rm = TRUE)) %>%
+  arrange(desc(Rata_Rasio))
+
+# Visualisasi rata-rata
+ggplot(avg_rasio, aes(x = reorder(Provinsi, Rata_Rasio), y = Rata_Rasio)) +
+  geom_bar(stat = "identity", fill = "dodgerblue") +
+  coord_flip() +
+  labs(title = "Rata-Rata Rasio Guru-Siswa Berdasarkan Provinsi", x = "Provinsi", y = "Rata-Rata Rasio Guru-Siswa")
+```
+
+Melihat hubungan antara jumlah rombel (rombongan belajar) dan ruang kelas di setiap provinsi.
+
+```{r}
+# Scatter plot hubungan rombel dan ruang kelas
+ggplot(sekolah_data, aes(x = Rombel, y = `Ruang.Kelas`)) +
+  geom_point(color = "darkgreen") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+  labs(title = "Hubungan Antara Jumlah Rombel dan Ruang Kelas", x = "Jumlah Rombel", y = "Jumlah Ruang Kelas") +
+  theme_minimal()
+```
+
+Menganalisis jumlah sekolah negeri dan swasta berdasarkan provinsi.
+
+```{r}
+# Distribusi status sekolah
+distribusi_status <- sekolah_data %>%
+  group_by(Provinsi, Status) %>%
+  summarise(Jumlah = n())
+
+# Visualisasi distribusi status sekolah
+ggplot(distribusi_status, aes(x = reorder(Provinsi, -Jumlah), y = Jumlah, fill = Status)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  labs(title = "Distribusi Status Sekolah Berdasarkan Provinsi", x = "Provinsi", y = "Jumlah Sekolah") +
+  theme_minimal()
 
 ```
 
 ## Data Preparation
+
 Membersihkan dan mempersiapkan data agar siap digunakan dalam analisis.
 
 ### Mengubah Nama Kolom
-```{r}
-colnames(sekolah_data)[colnames(sekolah_data) == "Provinsi"] = "provinsi" #Kolom porvinsi
-colnames(sekolah_data)[colnames(sekolah_data) == "Sekolah"] = "sekolah" #Kolom sekolah
-colnames(sekolah_data)[colnames(sekolah_data) == "Siswa"] = "siswa" #kolom siswa
-colnames(sekolah_data)[colnames(sekolah_data) == "Mengulang"] = "mengulang" #kolom mengulang
-colnames(sekolah_data)[colnames(sekolah_data) == "Putus.Sekolah"] = "putus_sekolah" #kolom putus sekolah
-colnames(sekolah_data)[colnames(sekolah_data) == "Kepala.Sekolah.&.Guru"] = "kepsek_dan_guru" #kolom kepsek dan guru
-colnames(sekolah_data)[colnames(sekolah_data) == "Tenaga.Kependidikan"] = "tendik" #
-colnames(sekolah_data)[colnames(sekolah_data) == "Rombel"] = "rombongan_belajar" #
-colnames(sekolah_data)[colnames(sekolah_data) == "Ruang.Kelas"] = "ruang_kelas" #
-colnames(sekolah_data)[colnames(sekolah_data) == "Status"] = "status" #
-colnames(sekolah_data)[colnames(sekolah_data) == "Tahun"] = "tahun" #
 
+```{r}
 # Daftar pasangan nama kolom lama dan baru
 new_colnames <- c("Provinsi" = "provinsi", 
                   "Sekolah" = "sekolah", 
@@ -114,15 +208,18 @@ new_colnames <- c("Provinsi" = "provinsi",
                   "Rombel" = "rombongan_belajar", 
                   "Ruang.Kelas" = "ruang_kelas", 
                   "Status" = "status", 
-                  "Tahun" = "tahun")
+                  "Tahun" = "tahun",
+                  "Rasio.Guru.Siswa" = "rasio_guru_siswa"
+                  )
 
 # Mengganti nama kolom
-colnames(sekolah_data) <- new_colnames[colnames(sekolah_data)]
+colnames(sekolah_data) = new_colnames[colnames(sekolah_data)]
 
 head(sekolah_data)
 ```
 
 ### Data Cleaning
+
 ```{r}
 # Mengecek apakah ada data duplikat
 duplikat = sum(duplicated(sekolah_data))
@@ -141,15 +238,23 @@ print(data_hilang)
 data = na.omit(sekolah_data)
 cat("Data setelah menghapus data hilang:", nrow(data), "baris\n\n")
 ```
+
 ### Data Transformation
+
 ```{r}
 
 ```
 
 ## Modeling
+
 Membuat dan menguji model untuk menjawab masalah yang telah dirumuskan.
+
 ```{r}
 # Spliting data
+set.seed(420)
+split = initial_split(sekolah_data, prop = 0.8, strata = status)
+data_train = split %>% training()
+data_test = split %>% testing()
 
 # Model Statistik - Uji T atau Mann-Whitney U Test
 
@@ -157,7 +262,9 @@ Membuat dan menguji model untuk menjawab masalah yang telah dirumuskan.
 ```
 
 ## Evaluasi
+
 Menilai kinerja model dan memastikan hasilnya relevan dengan tujuan bisnis.
+
 ```{r}
 # Testing Model
 
