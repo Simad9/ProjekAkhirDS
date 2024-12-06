@@ -339,6 +339,8 @@ conf_matrix = confusionMatrix(
 )
 conf_matrix
 
+cat("\n\n=== Decisition Tree === \n\n")
+
 # Melakukan testing pada Decision Tree
 # Prediksi pada data uji
 data_test <- data_test %>%
@@ -478,7 +480,7 @@ Dalam Pengujian kedua model ini, model Multinomial Regression lebih direkomendas
 - Kemampuan untuk menangani data yang lebih sederhana
 
 Selain itu,
-Berdasarkan hasil analsis yang dilakukan, menunjukkan bahwa terdapat ketimpangan dalam kategori rasio guru-siswa di berbagai provinsi setiap tahunnya. Berdasarkan visualisasi data, terlihat bahwa beberapa provinsi memiliki rasio guru-siswa yang sangat tinggi, sementara yang lainnya memiliki rasio yang sangat rendah. Hal ini menunjukkan adanya disparitas dalam distribusi sumber daya pendidikan, yang bisa berdampak pada kualitas pendidikan di daerah-daerah tertentu.
+Berdasarkan hasil analsis yang dilakukan, menunjukkan bahwa terdapat ketimpangan dalam kategori rasio guru-siswa di berbagai provinsi setiap tahunnya. Berdasarkan visualisasi data, terlihat bahwa beberapa provinsi memiliki rasio guru-siswa yang sangat tinggi, sementara yang lainnya memiliki rasio yang sangat rendah. Hal ini menunjukkan adanya kesenjangan dalam distribusi sumber daya pendidikan, yang bisa berdampak pada kualitas pendidikan di daerah-daerah tertentu.
 
 Ketimpangan ini berpotensi memengaruhi kualitas pembelajaran, karena daerah dengan rasio guru-siswa yang tinggi mungkin mengalami kesulitan dalam memberikan perhatian yang cukup kepada setiap siswa, sementara daerah dengan rasio yang lebih rendah mungkin dapat memberikan perhatian lebih, namun dengan sumber daya yang terbatas.
 
