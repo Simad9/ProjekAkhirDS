@@ -1,0 +1,194 @@
+## Modeling
+
+```{r}
+# Spliting data
+set.seed(420)
+split = initial_split(data, prop = 0.8, strata = kategori) #di split 80:20
+data_train = split %>% training()
+data_test = split %>% testing()
+```
+
+### Model Multinom Regression
+```{r}
+model = multinom(
+  kategori ~ siswa + kepsek_dan_guru + sekolah, 
+  data = data_train, 
+  maxit = 8
+  )
+# summary(model)
+```
+
+Lakukan testing model multinom
+
+```{r}
+# Melakukan testing
+predictions = predict(model, data_test)
+```
+
+Lakukan evaluasi hasil prediksi menggunakan confusion matrix
+```{r}
+# Melakukan evaluasi
+conf_matrix = confusionMatrix(
+  as.factor(predictions), as.factor(data_test$kategori)
+)
+conf_matrix
+```
+
+### Model Statistik menggunakan Linear Regression
+
+```{r}
+## Membuat model Linear Regression
+linear_model <- lm(rasio_guru_siswa ~ siswa + sekolah + kepsek_dan_guru, data = data)
+
+# Melihat ringkasan hasil model
+# summary(linear_model)
+
+# Evaluasi model dengan prediksi
+data$pred_linear <- predict(linear_model, newdata = data)
+
+# Visualisasi hasil prediksi
+ggplot(data, aes(x = rasio_guru_siswa, y = pred_linear)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Prediksi Rasio Guru-Siswa dengan Linear Regression",
+       x = "Rasio Guru-Siswa (Aktual)",
+       y = "Prediksi Rasio Guru-Siswa") +
+  theme_minimal()
+```
+
+### Model Machine Learning menggunakan Decision Tree
+
+```{r}
+# Import library untuk Decision Tree
+library(rpart)
+library(rpart.plot)
+
+# Membuat model Decision Tree
+tree_model <- rpart(rasio_guru_siswa ~ siswa + sekolah + kepsek_dan_guru, data = data_test, method = "anova")
+
+# Melihat ringkasan hasil model
+# summary(tree_model)
+
+# Visualisasi pohon keputusan
+rpart.plot(tree_model, main = "Pohon Keputusan untuk Prediksi Rasio Guru-Siswa")
+
+# Evaluasi model dengan prediksi
+data$pred_tree <- predict(tree_model, newdata = data)
+
+# Visualisasi hasil prediksi
+ggplot(data, aes(x = rasio_guru_siswa, y = pred_tree)) +
+  geom_point(color = "red") +
+  labs(title = "Prediksi Rasio Guru-Siswa dengan Decision Tree",
+       x = "Rasio Guru-Siswa (Aktual)",
+       y = "Prediksi Rasio Guru-Siswa") +
+  theme_minimal()
+
+```
+
+## Evaluasi
+```{r}
+# Testing Model
+# Menghitung MAE dan RMSE untuk Linear Regression
+mae_linear <- mean(abs(data$rasio_guru_siswa - data$pred_linear))
+rmse_linear <- sqrt(mean((data$rasio_guru_siswa - data$pred_linear)^2))
+
+cat("MAE Linear Regression: ", mae_linear, "\n")
+cat("RMSE Linear Regression: ", rmse_linear, "\n\n")
+
+# Menghitung MAE dan RMSE untuk Decision Tree
+mae_tree <- mean(abs(data$rasio_guru_siswa - data$pred_tree))
+rmse_tree <- sqrt(mean((data$rasio_guru_siswa - data$pred_tree)^2))
+
+cat("MAE Decision Tree: ", mae_tree, "\n")
+cat("RMSE Decision Tree: ", rmse_tree, "\n")
+```
+
+### Visualisasi Perbandingan
+
+Pada bagian ini akan membuat visualisasi untuk membandingkan hasil kinerja dari kedua model, antara machine learning model dengan statistical model.
+
+```{r}
+# Visualisasi Prediksi
+ggplot(data, aes(x = rasio_guru_siswa)) +
+  geom_point(aes(y = pred_linear, color = "Linear Regression"), alpha = 0.7) +
+  geom_point(aes(y = pred_tree, color = "Decision Tree"), alpha = 0.7) +
+  labs(title = "Perbandingan Prediksi Rasio Guru-Siswa", x = "Rasio Guru-Siswa Aktual", y = "Rasio Guru-Siswa Prediksi") +
+  scale_color_manual(values = c("Linear Regression" = "blue", "Decision Tree" = "red")) +
+  theme_minimal()
+
+```
+
+## Tambahan
+
+Disini kami menambahkan Shinny agar pengguna dapat mengguji sendiri bagaimana kinerja dari kedua model yang digunakan, dengan menginputkan sendiri nilai yang diinginkan dari setiap variabel yang digunakan.
+
+### Shinny
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  titlePanel("Pengujian Model Prediksi Rasio Guru-Siswa"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("siswa", "Jumlah Siswa:", 100),
+      numericInput("sekolah", "Jumlah Sekolah:", 10),
+      numericInput("guru", "Jumlah Guru:", 20),
+      selectInput("status", "Status Sekolah:", choices = c("Negeri", "Swasta")),
+      actionButton("predict", "Prediksi")
+    ),
+    
+    mainPanel(
+      verbatimTextOutput("result"),
+      plotOutput("comparison_plot")
+    )
+  )
+)
+
+# Server
+server <- function(input, output) {
+  observeEvent(input$predict, {
+    new_data <- data.frame(
+      siswa = input$siswa,
+      sekolah = input$sekolah,
+      kepsek_dan_guru = input$guru,
+      status = input$status
+    )
+    
+    # Prediksi
+    pred_linear <- predict(linear_model, newdata = new_data)
+    pred_tree <- predict(tree_model, newdata = new_data)
+    
+    # Hasil
+    output$result <- renderPrint({
+      cat("Prediksi Linear Regression:", pred_linear, "\n")
+      cat("Prediksi Decision Tree:", pred_tree, "\n")
+    })
+    
+    # Visualisasi
+    output$comparison_plot <- renderPlot({
+      bar_data <- data.frame(
+        Model = c("Linear Regression", "Decision Tree"),
+        Prediksi = c(pred_linear, pred_tree)
+      )
+      
+      ggplot(bar_data, aes(x = Model, y = Prediksi, fill = Model)) +
+        geom_bar(stat = "identity", color = "black") +
+        labs(title = "Perbandingan Prediksi", y = "Rasio Guru-Siswa") +
+        theme_minimal()
+    })
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+### Kesimpulan
+
+berdasarkan hasil analalisis yang kami lakukan, diperoleh kesimpilan yaitu; - Evaluasi Kinerja Model: Model Linear Regression memiliki RMSE lebih kecil dibandingkan Decision Tree, menunjukkan model ini lebih stabil untuk memprediksi rasio guru-siswa. Namun, Decision Tree lebih fleksibel dalam menangkap hubungan non-linear.
+
+-   Insight Penting: Rasio guru-siswa sangat dipengaruhi oleh jumlah siswa dan jumlah guru, dengan disparitas regional yang signifikan.
+
+-   Rekomendasi: Kebijakan pendidikan perlu fokus pada pemerataan distribusi guru, terutama di daerah dengan rasio yang rendah. Jangan jawa sentris guys kasihan pulau lain.
