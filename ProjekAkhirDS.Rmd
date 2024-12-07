@@ -374,9 +374,9 @@ ggplot(data_test, aes(x = predicted_category, fill = "Multinomial Regression")) 
        y = "Jumlah",
        fill = "Model") +
   theme_minimal()
-#----------------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 ### Opsi Visualisasi dengan headmap
-#----------------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 # Membuat confusion matrix
 conf_matrix_multinom <- table(Predicted = data_test$predicted_category, Actual = data_test$kategori)
 conf_matrix_dt <- table(Predicted = data_test$pred_dt, Actual = data_test$kategori)
